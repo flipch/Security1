@@ -1,6 +1,8 @@
 package com.sc.server;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -60,6 +62,10 @@ public class PhotoShare {
 
 	public Pair<Boolean, String> authUser(String inUser, String inPasswd) {
 		return uc.authUser(inUser, inPasswd);
+	}
+
+	public void addPhoto(String user, ObjectInputStream clientIn, ObjectOutputStream clientOut) throws ClassNotFoundException, IOException {
+		pc.addPhoto(user, clientIn, clientOut);
 	}
 
 }
