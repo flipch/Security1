@@ -28,6 +28,7 @@ public class Server {
 
 		// Folder created we can start our server.
 		try {
+			System.out.println("[" + LocalDateTime.now() + "] " + "Starting server.");
 			startServer();
 		} catch (SocketException se) {
 			System.err.println(se.getMessage());

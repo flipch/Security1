@@ -55,7 +55,7 @@ public class UserCatalog {
 	 * @param user
 	 * @return exists? true : false
 	 */
-	private boolean find(User user) {
+	public boolean find(User user) {
 		return this.uc.contains(user);
 	}
 
@@ -64,7 +64,7 @@ public class UserCatalog {
 	 * @param user username to be checked
 	 * @return exists? true : false
 	 */
-	private boolean exists(String user) {
+	public boolean exists(String user) {
 		for (User u : this.uc) {
 			if (u.user == user)
 				return true;
@@ -100,7 +100,7 @@ public class UserCatalog {
 	 * 
 	 * @param client
 	 */
-	private void add(User client) {
+	public void add(User client) {
 		this.uc.add(client);
 		File f = Utils.getFile("Users/users.txt");
 		try {
