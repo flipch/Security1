@@ -22,7 +22,7 @@ public class ServerThread extends Thread {
 	ServerThread(Socket soc, PhotoShare state) {
 		this.socket = soc;
 		this.server = state;
-		System.out.println("[" + LocalDateTime.now() + "]" + " New client");
+		System.out.println("[" + LocalDateTime.now() + "] " + "New client");
 	}
 
 	/**
@@ -34,20 +34,32 @@ public class ServerThread extends Thread {
 			ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
-			String inUser = "";
-			String inPasswd = "";
+			String user = "";
+			String pwd = "";
 
 			try {
 				// User authentication.
-				inUser = (String) inStream.readObject();
-				inPasswd = (String) inStream.readObject();
+				user = (String) inStream.readObject();
+				pwd = (String) inStream.readObject();
 
 				//
-				if (auth(inUser, inPasswd, outStream)) {
-					String operacao = (String) inStream.readObject();
-					switch (operacao) {
-					default:
-
+				if (auth(user, pwd, outStream)) {
+					while (!this.socket.isClosed()) {
+						String operacao = (String) inStream.readObject();
+						switch (operacao) {
+						case "-a":
+							this.server.addPhoto(user, inStream, outStream);
+							break;
+						case "-i":
+							// TODO
+							break;
+						case "-l":
+							// TODO
+							break;
+						default:
+							outStream.writeChars("Operacao invalida");
+							break;
+						}
 					}
 				}
 			} catch (ClassNotFoundException e1) {
@@ -62,12 +74,14 @@ public class ServerThread extends Thread {
 	}
 
 	/**
-	 * Authenticates given username and password.
-	 * Responds to client with answer.
+	 * Authenticates given username and password. Responds to client with answer.
 	 * 
-	 * @param inUser User to test
-	 * @param inPasswd Password to test
-	 * @param outStream	Client communication channel for response
+	 * @param inUser
+	 *            User to test
+	 * @param inPasswd
+	 *            Password to test
+	 * @param outStream
+	 *            Client communication channel for response
 	 * @return validUser ? true : false
 	 * @throws IOException
 	 */
