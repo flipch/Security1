@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 import com.sc.utilities.Pair;
 
@@ -27,7 +28,7 @@ public class PhotoShare {
 		try {
 			this.socket = new ServerSocket(23232);
 		} catch (IOException e) {
-			System.err.println("Failed creating socket 23232\nMore info:" + e.getMessage());
+			System.err.println("[" + LocalDateTime.now() + "] " + "Failed creating socket 23232\nMore info:" + e.getMessage());
 			System.exit(-1);
 		}
 	}
@@ -50,7 +51,7 @@ public class PhotoShare {
 				}
 			}
 		} else {
-			System.err.println("Port is still closed!Exiting..");
+			System.err.println("[" + LocalDateTime.now() + "] " + "Port is still closed!Exiting..");
 		}
 	}
 

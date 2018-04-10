@@ -3,6 +3,7 @@ package com.sc.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
+import java.time.LocalDateTime;
 
 /**
  * Runnable class for server.
@@ -21,7 +22,7 @@ public class Server {
 		if (!serverFolder.exists()) {
 			if (!serverFolder.mkdir())
 				// Folder creation failed
-				System.err.println("Failed creating server folder!");
+				System.err.println("[" + LocalDateTime.now() + "] " + "Failed creating server folder!");
 			return;
 		}
 
