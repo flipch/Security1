@@ -23,12 +23,12 @@ import com.sc.utilities.Pair;
  */
 public class PhotoCatalog {
 
-	private ArrayList<Photo> photos;
+	public ArrayList<Photo> photos;
 
-	public Pair<Boolean, String> addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+	public Pair<Boolean, String> addPhoto(String path, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
 
-		String userDir = "Server/".concat(user.username);
+		String userDir = path;
 
 		File dir = new File(userDir);
 		if (!dir.exists())
@@ -70,10 +70,10 @@ public class PhotoCatalog {
 
 			writer.close();
 			photoStream.close();
-			return new Pair<Boolean,String>(true,"Success, received image.");
+			return new Pair<Boolean, String>(true, "Success, received image.");
 		} else {
 			System.out.println("[" + LocalDateTime.now() + "] " + "Picture already exists");
-			return new Pair<Boolean,String>(false,"Picture already exists");
+			return new Pair<Boolean, String>(false, "Picture already exists");
 		}
 	}
 

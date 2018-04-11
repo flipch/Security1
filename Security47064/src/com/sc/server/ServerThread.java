@@ -58,20 +58,23 @@ public class ServerThread extends Thread {
 							break;
 						case "-l":
 							// If localUser follows given user list all photos from given user.
-							// TODO
+							this.server.listPhotos(localUser, inStream, outStream);
 							break;
 						case "-g":
 							// Send all photos from given user name to client if
 							// localUser.follows(givenUser).
-							// TODO
+
+							this.server.sendPhotos(localUser, inStream, outStream);
 							break;
 						case "-f":
 							// Adds localUser to given user followers
 							// TODO
+							this.server.follow(localUser, inStream, outStream);
 							break;
 						case "-r":
 							// Removes localUser from given user followers
 							// TODO
+							this.server.unfollow(localUser, inStream, outStream);
 							break;
 						default:
 							outStream.writeChars("Operacao invalida");

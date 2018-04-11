@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import com.sc.utilities.Pair;
@@ -139,6 +141,26 @@ public class UserCatalog {
 			return new Pair<Boolean, String>(false, "Local user not found");
 		}
 
+	}
+
+	public User get(String userCheck) {
+
+		for (User u : this.uc) {
+			if (u.username.equals(userCheck))
+				return u;
+		}
+		return null;
+	}
+
+	public Pair<Boolean, String> addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
+		// Find our user in the array
+		User test = this.get(user.username);
+		
+		if( test != null )
+		{
+			return test.addPhoto(clientIn, clientOut);
+		}
+		return new Pair<Boolean, String>(false, "Erro a adicionar foto");
 	}
 
 }
