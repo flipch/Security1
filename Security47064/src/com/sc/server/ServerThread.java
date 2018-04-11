@@ -68,12 +68,10 @@ public class ServerThread extends Thread {
 							break;
 						case "-f":
 							// Adds localUser to given user followers
-							// TODO
 							this.server.follow(localUser, inStream, outStream);
 							break;
 						case "-r":
 							// Removes localUser from given user followers
-							// TODO
 							this.server.unfollow(localUser, inStream, outStream);
 							break;
 						default:

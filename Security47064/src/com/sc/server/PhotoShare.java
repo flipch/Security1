@@ -150,8 +150,24 @@ public class PhotoShare {
 	}
 
 	public void follow(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
-		// TODO Auto-generated method stub
+		try {
+			String userCheck = (String) clientIn.readObject();
+			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
 
+			// If localUser doesnt follow then follow
+			if (!result.first()) {
+				User user = this.uc.get(userCheck);
+				user.addFollower(localUser.username);
+			} else {
+				// Already follows
+				System.err.println("[" + LocalDateTime.now() + "] " + "Already follows");
+				clientOut.writeChars("Already follows");
+			}
+
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -123,4 +123,18 @@ public class User {
 
 	}
 
+	public void addFollower(String user) {
+		try {
+			// Write to db
+			BufferedWriter bw = new BufferedWriter( new FileWriter(this.followersFile, true));
+			bw.write(user);
+			bw.newLine();	
+			bw.close();
+			// Db updated now persist in memory
+			this.followers.add(user);
+		} catch( IOException e ) {
+			e.printStackTrace();
+		}
+	}
+
 }
