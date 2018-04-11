@@ -57,8 +57,6 @@ public class Client {
 			// Log in or exit if wrong password.
 			handleLogIn(input, socket, args[0], args[1]);
 
-			socket.close();
-			input.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,11 +72,14 @@ public class Client {
 			out.writeObject(pwd);
 
 			// Check our answer.
-			@SuppressWarnings("unchecked")
-			Pair<Boolean, String> res = (Pair<Boolean, String>) in.readObject();
+			// Wacky stuff happens with serialization.
+			boolean first = (boolean) in.readObject();
+			String second = (String) in.readObject();
+
+			Pair<Boolean, String> res = new Pair<Boolean, String>(first, second);
 			if (res.first()) {
-				System.out.println("[" + LocalDateTime.now() + "] " + "Logged in " + username);
-				String userDir = "Clients/" + username;
+				System.out.println("[" + LocalDateTime.now() + "] " + "Welcome " + username);
+				String userDir = "Client/" + username;
 				File dir = new File(userDir);
 				if (!dir.exists())
 					dir.mkdir();
@@ -102,10 +103,10 @@ public class Client {
 		while (!quit) {
 			System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
 			System.out.println("[" + LocalDateTime.now() + "] "
-					+ "[ -a <photos> | -l <userId> | -i <userId> <photo> | -g <userId> \n"
-					+ "| -c <comment> <userId> <photo> | -L <userId> <photo> | \n -D <userId> <photo> | -f <followUserIds> | -r <followUserIds> | -quit ]");
+					+ "[ -a <photos> | -l <userId> | -i <userId> | -g <userId> \n"
+					+ "| -f <followUserIds> | -r <followUserIds> | -quit ]");
 			String op = input.nextLine();
-			String[] args = op.split("");
+			String[] args = op.split(" ");
 
 			switch (args[0]) {
 			case "-a":
@@ -126,7 +127,7 @@ public class Client {
 			case "-r":
 				unfollow(args, out, in);
 				break;
-			case "-q":
+			case "-quit":
 				quit = !quit;
 				System.out.println("[" + LocalDateTime.now() + "] " + "Closing");
 				break;

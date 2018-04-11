@@ -30,11 +30,14 @@ public class User {
 	public ArrayList<String> followers;
 	public File followersFile;
 	public PhotoCatalog pc;
-
+	public File userDir;
+	
 	public User(String inUser, String inPasswd) {
 		this.username = inUser;
 		this.pw = inPasswd;
-		this.followersFile = new File("Server/".concat(this.username).concat("/followers.txt"));
+		this.userDir = new File("Server/".concat(this.username));
+		this.userDir.mkdir();	// Even if it exists it's ok.
+		this.followersFile = new File(userDir.toPath().toString().concat("/followers.txt"));
 		if (!this.followersFile.exists())
 			try {
 				this.followersFile.createNewFile();

@@ -3,6 +3,8 @@
  */
 package com.sc.utilities;
 
+import java.io.Serializable;
+
 /**
  * Spent way too much time trying to import it from java sdk so I just built
  * one. Allows me to return more than one object in a function
@@ -10,7 +12,7 @@ package com.sc.utilities;
  * @author Felipe
  *
  */
-public class Pair<K, V> {
+public class Pair<K, V> implements Serializable{
 
 	private final K first;
 	private final V second;

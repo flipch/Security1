@@ -27,6 +27,7 @@ public class PhotoShare {
 		// Prepare the socket for listening.
 		try {
 			this.socket = new ServerSocket(23232);
+			this.uc = new UserCatalog("Users.txt");
 		} catch (IOException e) {
 			System.err.println(
 					"[" + LocalDateTime.now() + "] " + "Failed creating socket 23232\nMore info:" + e.getMessage());

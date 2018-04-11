@@ -106,7 +106,10 @@ public class ServerThread extends Thread {
 	private boolean auth(String inUser, String inPasswd, ObjectOutputStream outStream) throws IOException {
 
 		Pair<Boolean, String> response = this.server.authUser(inUser, inPasswd);
-		outStream.writeChars(response.second());
+
+		System.out.println("[" + LocalDateTime.now() + "] " + "User " + inUser + " logged in ");
+		outStream.writeObject(response.first());
+		outStream.writeObject(response.second());
 
 		boolean validUser = response.first();
 		return validUser;

@@ -27,6 +27,7 @@ public class UserCatalog {
 	private ArrayList<User> uc;
 
 	public UserCatalog(String users) {
+		this.uc = new ArrayList<User>();
 		populate(users);
 	}
 
@@ -116,7 +117,7 @@ public class UserCatalog {
 	 */
 	public void add(User client) {
 		this.uc.add(client);
-		File f = Utils.getFile("Users/users.txt");
+		File f = Utils.getFile("Users.txt");
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
 			bw.write(client.username.concat(":").concat(client.pw));
