@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import com.sc.utilities.Pair;
 
@@ -35,7 +34,7 @@ public class Client {
 
 		// Folder created we can start our server.
 		try {
-			System.out.println("[" + LocalDateTime.now() + "] " + "Welcome to PhotoShare.");
+			System.out.println("[" + LocalDateTime.now() + "] " + "Starting Client.");
 			startClient(args);
 		} catch (SocketException se) {
 			System.err.println(se.getMessage());
@@ -54,7 +53,7 @@ public class Client {
 			int sock = Integer.parseInt(untreatedSv[1]);
 			Pair<String, Integer> connectionSettings = new Pair<String, Integer>(ip, sock);
 			socket = new Socket(connectionSettings.first(), connectionSettings.second());
-
+			System.out.println("[" + LocalDateTime.now() + "] " + "Found Server!");
 			// Log in or exit if wrong password.
 			handleLogIn(input, socket, args[0], args[1]);
 
@@ -75,9 +74,10 @@ public class Client {
 			out.writeObject(pwd);
 
 			// Check our answer.
+			@SuppressWarnings("unchecked")
 			Pair<Boolean, String> res = (Pair<Boolean, String>) in.readObject();
 			if (res.first()) {
-				System.out.println("[" + LocalDateTime.now() + "] " + "Bem vindo " + username);
+				System.out.println("[" + LocalDateTime.now() + "] " + "Logged in " + username);
 				String userDir = "Clients/" + username;
 				File dir = new File(userDir);
 				if (!dir.exists())
@@ -98,14 +98,15 @@ public class Client {
 
 	private static void handleCommands(Scanner input, Socket socket, String username, String pwd, ObjectInputStream in,
 			ObjectOutputStream out) {
-		System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
-		System.out.println("[" + LocalDateTime.now() + "] "
-				+ "[ -a <photos> | -l <userId> | -i <userId> <photo> | -g <userId> \n"
-				+ "| -c <comment> <userId> <photo> | -L <userId> <photo> | \n -D <userId> <photo> | -f <followUserIds> | -r <followUserIds> ]");
-		String op = input.nextLine();
-		String[] args = op.split("");
 		boolean quit = false;
 		while (!quit) {
+			System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
+			System.out.println("[" + LocalDateTime.now() + "] "
+					+ "[ -a <photos> | -l <userId> | -i <userId> <photo> | -g <userId> \n"
+					+ "| -c <comment> <userId> <photo> | -L <userId> <photo> | \n -D <userId> <photo> | -f <followUserIds> | -r <followUserIds> | -quit ]");
+			String op = input.nextLine();
+			String[] args = op.split("");
+
 			switch (args[0]) {
 			case "-a":
 				sendPhoto(args, out, in);
