@@ -78,7 +78,10 @@ public class User {
 			// Overwrite old file.
 			Files.move(temp.toPath(), this.followersFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			System.out.println("[" + LocalDateTime.now() + "] " + "Unfollowed " + follower);
-
+			// Db updated
+			// Persist in memory
+			this.followers.remove(follower);
+			
 			reader.close();
 			writer.close();
 		} catch (IOException e) {
