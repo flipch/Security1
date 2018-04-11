@@ -18,9 +18,6 @@ import com.sc.utilities.Pair;
  */
 public class Client {
 
-	private static final String IPPort = "(\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}):(\\d{1,5})";
-	private static final Pattern PATTERN = Pattern.compile(IPPort);
-
 	/**
 	 * Run client
 	 * 
@@ -87,7 +84,7 @@ public class Client {
 					dir.mkdir();
 
 				// All good and logged in lets handle commands
-				handleCommands(input, socket, username, pwd);
+				handleCommands(input, socket, username, pwd, in, out);
 			} else {
 				System.out.println(res.second());
 			}
@@ -99,11 +96,81 @@ public class Client {
 
 	}
 
-	private static void handleCommands(Scanner input, Socket socket, String username, String pwd) {
+	private static void handleCommands(Scanner input, Socket socket, String username, String pwd, ObjectInputStream in,
+			ObjectOutputStream out) {
 		System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
 		System.out.println("[" + LocalDateTime.now() + "] "
 				+ "[ -a <photos> | -l <userId> | -i <userId> <photo> | -g <userId> \n"
 				+ "| -c <comment> <userId> <photo> | -L <userId> <photo> | \n -D <userId> <photo> | -f <followUserIds> | -r <followUserIds> ]");
+		String op = input.nextLine();
+		String[] args = op.split("");
+		boolean quit = false;
+		while (!quit) {
+			switch (args[0]) {
+			case "-a":
+				sendPhoto(args, out, in);
+				break;
+			case "-l":
+				getList(args, out, in);
+				break;
+			case "-i":
+				isFollower(args, out, in);
+				break;
+			case "-g":
+				getPhotos(args, in, out);
+				break;
+			case "-f":
+				follow(args, in, out);
+				break;
+			case "-r":
+				unfollow(args, out, in);
+				break;
+			case "-q":
+				quit = !quit;
+				System.out.println("[" + LocalDateTime.now() + "] " + "Closing");
+				break;
+			default:
+				System.out.println("[" + LocalDateTime.now() + "] " + "Invalid operation");
+			}
+		}
+
+		try {
+			in.close();
+			out.close();
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private static void unfollow(String[] args, ObjectOutputStream out, ObjectInputStream in) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void follow(String[] args, ObjectInputStream in, ObjectOutputStream out) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void getPhotos(String[] args, ObjectInputStream in, ObjectOutputStream out) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void isFollower(String[] args, ObjectOutputStream out, ObjectInputStream in) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void getList(String[] args, ObjectOutputStream out, ObjectInputStream in) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void sendPhoto(String[] args, ObjectOutputStream out, ObjectInputStream in) {
+		// TODO Auto-generated method stub
 
 	}
 
