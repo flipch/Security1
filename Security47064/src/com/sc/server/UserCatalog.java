@@ -127,10 +127,8 @@ public class UserCatalog {
 	public Pair<Boolean, String> checkFollower(User user, String userCheck) {
 		User local = this.find(user);
 		if (local != null) {
-			// Look for localUser followers txt
-			File followersFile = new File("Server/".concat(user.username).concat("/followers.txt"));
 			// Populate for our user it's followers with the latest ones
-			local.updateFollowers(followersFile);
+			local.updateFollowers();
 			// Now check if it contains our user check
 			if (local.followers.contains(userCheck)) {
 				return new Pair<Boolean, String>(true, userCheck + " follows " + user.username);

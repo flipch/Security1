@@ -66,7 +66,7 @@ public class PhotoShare {
 
 	public void addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
-		pc.addPhoto(user, clientIn, clientOut);
+		clientOut.writeChars(pc.addPhoto(user, clientIn, clientOut).second());
 	}
 
 	public void checkFollower(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
@@ -75,8 +75,6 @@ public class PhotoShare {
 		Pair<Boolean, String> result = uc.checkFollower(user, userCheck);
 		System.err.println("[" + LocalDateTime.now() + "] " + result.second());
 		clientOut.writeChars(result.second());
-		;
-
 	}
 
 }

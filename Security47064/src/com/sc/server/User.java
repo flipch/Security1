@@ -22,15 +22,23 @@ public class User {
 	public String username;
 	public String pw;
 	public ArrayList<String> followers;
+	private File followersFile;
 
 	public User(String inUser, String inPasswd) {
 		this.username = inUser;
 		this.pw = inPasswd;
+		this.followersFile = new File("Server/".concat(this.username).concat("/followers.txt"));
+		if (!this.followersFile.exists())
+			try {
+				this.followersFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 
-	public void updateFollowers(File followersFile) {
+	public void updateFollowers() {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(followersFile));
+			BufferedReader reader = new BufferedReader(new FileReader(this.followersFile));
 			reader.lines().forEach(line -> this.followers.add(line));
 			reader.close();
 		} catch (IOException e) {
@@ -38,9 +46,9 @@ public class User {
 		}
 	}
 
-	public void removeFollower(File followersFile, String follower) {
+	public void removeFollower(String follower) {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(followersFile));
+			BufferedReader reader = new BufferedReader(new FileReader(this.followersFile));
 			File temp = new File("temp.txt"); // Temporary changes with removed follower.
 			BufferedWriter writer = new BufferedWriter(new FileWriter(temp));
 
@@ -61,7 +69,7 @@ public class User {
 			});
 			// Temp file already altered
 			// Overwrite old file.
-			Files.move(temp.toPath(), followersFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.move(temp.toPath(), this.followersFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 			reader.close();
 			writer.close();
