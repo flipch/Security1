@@ -49,12 +49,28 @@ public class ServerThread extends Thread {
 						String operacao = (String) inStream.readObject();
 						switch (operacao) {
 						case "-a":
+							// Add photo from client to server.
 							this.server.addPhoto(localUser, inStream, outStream);
 							break;
 						case "-i":
+							// Only checks if given username is a follower
 							this.server.checkFollower(localUser, inStream, outStream);
 							break;
 						case "-l":
+							// If localUser follows given user list all photos from given user.
+							// TODO
+							break;
+						case "-g":
+							// Send all photos from given user name to client if
+							// localUser.follows(givenUser).
+							// TODO
+							break;
+						case "-f":
+							// Adds localUser to given user followers
+							// TODO
+							break;
+						case "-r":
+							// Removes localUser from given user followers
 							// TODO
 							break;
 						default:
