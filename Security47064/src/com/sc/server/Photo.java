@@ -11,8 +11,12 @@ import java.time.LocalDateTime;
  */
 public class Photo {
 
+	public String photo;
+	public LocalDateTime dateCreated;
+
 	public Photo(String photo, LocalDateTime dt) {
-		// TODO Auto-generated constructor stub
+		this.photo = photo;
+		this.dateCreated = dt;
 	}
 
 }

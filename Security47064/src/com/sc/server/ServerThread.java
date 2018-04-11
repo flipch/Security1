@@ -34,24 +34,25 @@ public class ServerThread extends Thread {
 			ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
-			String user = "";
+			String username = "";
 			String pwd = "";
 
 			try {
 				// User authentication.
-				user = (String) inStream.readObject();
+				username = (String) inStream.readObject();
 				pwd = (String) inStream.readObject();
 
 				//
-				if (auth(user, pwd, outStream)) {
+				if (auth(username, pwd, outStream)) {
+					User localUser = new User(username, pwd);
 					while (!this.socket.isClosed()) {
 						String operacao = (String) inStream.readObject();
 						switch (operacao) {
 						case "-a":
-							this.server.addPhoto(user, inStream, outStream);
+							this.server.addPhoto(localUser, inStream, outStream);
 							break;
 						case "-i":
-							// TODO
+							this.server.checkFollower(localUser, inStream, outStream);
 							break;
 						case "-l":
 							// TODO

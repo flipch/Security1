@@ -15,6 +15,8 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import com.sc.utilities.Pair;
+
 /**
  * @author Felipe
  *
@@ -23,10 +25,10 @@ public class PhotoCatalog {
 
 	private ArrayList<Photo> photos;
 
-	public void addPhoto(String user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+	public Pair<Boolean, String> addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
 
-		String userDir = "Server/".concat(user);
+		String userDir = "Server/".concat(user.username);
 
 		File dir = new File(userDir);
 		if (!dir.exists())
@@ -67,12 +69,11 @@ public class PhotoCatalog {
 			this.photos.add(new Photo(photo, dt));
 
 			writer.close();
-			clientOut.writeObject("[" + LocalDateTime.now() + "] " + "Success, received image.");
 			photoStream.close();
-
+			return new Pair<Boolean,String>(true,"Success, received image.");
 		} else {
 			System.out.println("[" + LocalDateTime.now() + "] " + "Picture already exists");
-			clientOut.writeObject("[" + LocalDateTime.now() + "] " + "Picture already exists");
+			return new Pair<Boolean,String>(false,"Picture already exists");
 		}
 	}
 

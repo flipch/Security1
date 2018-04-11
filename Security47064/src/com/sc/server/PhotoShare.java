@@ -64,8 +64,19 @@ public class PhotoShare {
 		return uc.authUser(inUser, inPasswd);
 	}
 
-	public void addPhoto(String user, ObjectInputStream clientIn, ObjectOutputStream clientOut) throws ClassNotFoundException, IOException {
+	public void addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+			throws ClassNotFoundException, IOException {
 		pc.addPhoto(user, clientIn, clientOut);
+	}
+
+	public void checkFollower(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+			throws ClassNotFoundException, IOException {
+		String userCheck = (String) clientIn.readObject();
+		Pair<Boolean, String> result = uc.checkFollower(user, userCheck);
+		System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+		clientOut.writeChars(result.second());
+		;
+
 	}
 
 }
