@@ -115,7 +115,7 @@ public class PhotoShare {
 				} else {
 					// Doesnt follow
 					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-					clientOut.writeObject(result.second());
+					clientOut.writeObject(result.first());
 				}
 			} else {
 				clientOut.writeObject("User not found");
