@@ -102,9 +102,9 @@ public class Client {
 		boolean quit = false;
 		while (!quit) {
 			System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
-			System.out.println("[" + LocalDateTime.now() + "] "
-					+ "[ -a <photos> | -l <userId> | -i <userId> | -g <userId> \n"
-					+ "| -f <followUserIds> | -r <followUserIds> | -quit ]");
+			System.out.println(
+					"[" + LocalDateTime.now() + "] " + "[ -a <photos> | -l <userId> | -i <userId> | -g <userId> \n"
+							+ "| -f <followUserIds> | -r <followUserIds> | -quit ]");
 			String op = input.nextLine();
 			String[] args = op.split(" ");
 
@@ -147,13 +147,36 @@ public class Client {
 	}
 
 	private static void unfollow(String[] args, ObjectOutputStream out, ObjectInputStream in) {
-		// TODO Auto-generated method stub
+		try {
+			// Send our operation.
+			out.writeObject(args[0]);
+			// Send our operation parameters
+			out.writeObject(args[1]);
+
+			// Read answer
+			String answer = (String) in.readObject();
+			System.out.println("[" + LocalDateTime.now() + "] " + answer);
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
 	private static void follow(String[] args, ObjectInputStream in, ObjectOutputStream out) {
-		// TODO Auto-generated method stub
+		try {
+			// Send our operation.
+			out.writeObject(args[0]);
+			// Send our operation parameters
+			out.writeObject(args[1]);
 
+			// Read answer
+			String answer = (String) in.readObject();
+			System.out.println("[" + LocalDateTime.now() + "] " + answer);
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void getPhotos(String[] args, ObjectInputStream in, ObjectOutputStream out) {

@@ -31,19 +31,22 @@ public class User {
 	public File followersFile;
 	public PhotoCatalog pc;
 	public File userDir;
-	
+
 	public User(String inUser, String inPasswd) {
 		this.username = inUser;
 		this.pw = inPasswd;
 		this.userDir = new File("Server/".concat(this.username));
-		this.userDir.mkdir();	// Even if it exists it's ok.
+		this.userDir.mkdir(); // Even if it exists it's ok.
+		this.followers = new ArrayList<String>();
 		this.followersFile = new File(userDir.toPath().toString().concat("/followers.txt"));
-		if (!this.followersFile.exists())
+		if (!this.followersFile.exists()) {
 			try {
 				this.followersFile.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		updateFollowers();
 	}
 
 	public void updateFollowers() {
@@ -79,14 +82,14 @@ public class User {
 			});
 			// Temp file already altered
 			// Overwrite old file.
+			reader.close();
+			writer.close();
+
 			Files.move(temp.toPath(), this.followersFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			System.out.println("[" + LocalDateTime.now() + "] " + "Unfollowed " + follower);
 			// Db updated
 			// Persist in memory
 			this.followers.remove(follower);
-			
-			reader.close();
-			writer.close();
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -132,15 +135,20 @@ public class User {
 	public void addFollower(String user) {
 		try {
 			// Write to db
-			BufferedWriter bw = new BufferedWriter( new FileWriter(this.followersFile, true));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(this.followersFile, true));
 			bw.write(user);
-			bw.newLine();	
+			bw.newLine();
 			bw.close();
 			// Db updated now persist in memory
 			this.followers.add(user);
-		} catch( IOException e ) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "User " + username.substring(0,1).toUpperCase() + username.substring(1);
 	}
 
 }

@@ -66,7 +66,7 @@ public class PhotoShare {
 
 	public void addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
-		clientOut.writeChars(this.uc.addPhoto(user, clientIn, clientOut).second());
+		clientOut.writeObject(this.uc.addPhoto(user, clientIn, clientOut).second());
 	}
 
 	public void checkFollower(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
@@ -74,7 +74,7 @@ public class PhotoShare {
 		String userCheck = (String) clientIn.readObject();
 		Pair<Boolean, String> result = uc.checkFollower(user, userCheck);
 		System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-		clientOut.writeChars(result.second());
+		clientOut.writeObject(result.second());
 	}
 
 	public void listPhotos(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
@@ -89,13 +89,13 @@ public class PhotoShare {
 				// List photos
 				int count = 1;
 				for (Photo p : this.uc.get(userCheck).getPhotos()) {
-					clientOut.writeChars(
+					clientOut.writeObject(
 							"Photo [" + count++ + "]:\nName " + p.photo + "\nDate created " + p.dateCreated);
 				}
 			} else {
 				// Doesnt follow
 				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-				clientOut.writeChars(result.second());
+				clientOut.writeObject(result.second());
 			}
 
 		} catch (ClassNotFoundException | IOException e) {
@@ -119,7 +119,7 @@ public class PhotoShare {
 			} else {
 				// Doesnt follow
 				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-				clientOut.writeChars(result.second());
+				clientOut.writeObject(result.second());
 			}
 		} catch (IOException |
 
@@ -132,18 +132,33 @@ public class PhotoShare {
 	public void unfollow(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		try {
 			String userCheck = (String) clientIn.readObject();
-			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
 
-			// If localUser follows then unfollow
-			if (result.first()) {
-				User user = this.uc.get(userCheck);
-				user.removeFollower(localUser.username);
+			if (userCheck.equals(localUser.username)) {
+				System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
+				clientOut.writeObject("You can't follow yourself ");
 			} else {
-				// Doesnt follow
-				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-				clientOut.writeChars(result.second());
-			}
 
+				Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
+				// If not a valid user.
+				if (result.second().contains("not found")) {
+					System.out.println("[" + LocalDateTime.now() + "] " + userCheck + " is not a user.");
+					clientOut.writeObject(userCheck + " is not a user.");
+				} else {
+					// If localUser follows then unfollow
+					if (result.first()) {
+						User user = this.uc.get(userCheck);
+						user.removeFollower(localUser.username);
+						System.out.println(
+								"[" + LocalDateTime.now() + "] " + localUser + " no longer follows " + userCheck);
+						clientOut.writeObject(localUser + " no longer follows "
+								+ userCheck.substring(0, 1).toUpperCase() + userCheck.substring(1));
+					} else {
+						// Doesnt follow
+						System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+						clientOut.writeObject(result.second());
+					}
+				}
+			}
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -153,18 +168,30 @@ public class PhotoShare {
 	public void follow(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		try {
 			String userCheck = (String) clientIn.readObject();
-			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
 
-			// If localUser doesnt follow then follow
-			if (!result.first()) {
-				User user = this.uc.get(userCheck);
-				user.addFollower(localUser.username);
+			if (userCheck.equals(localUser.username)) {
+				System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
+				clientOut.writeObject("You can't follow yourself ");
 			} else {
-				// Already follows
-				System.err.println("[" + LocalDateTime.now() + "] " + "Already follows");
-				clientOut.writeChars("Already follows");
+				Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
+				// If not an user return that error.
+				if (result.second().contains("not found")) {
+					System.out.println("[" + LocalDateTime.now() + "] " + userCheck + " is not a user.");
+					clientOut.writeObject(userCheck + " is not a user.");
+				} else {
+					// If localUser doesnt follow then follow.
+					if (!result.first()) {
+						User user = this.uc.get(userCheck);
+						user.addFollower(localUser.username);
+						System.out.println("[" + LocalDateTime.now() + "] " + localUser + " now follows " + userCheck);
+						clientOut.writeObject(localUser + " now follows " + userCheck);
+					} else {
+						// Already follows
+						System.err.println("[" + LocalDateTime.now() + "] " + "Already follows");
+						clientOut.writeObject("Already follows");
+					}
+				}
 			}
-
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

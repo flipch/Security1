@@ -62,12 +62,26 @@ public class UserCatalog {
 	 * @return found user
 	 */
 	public User find(User user) {
-		int index = -1;
-		if ((index = this.uc.indexOf(user)) > -1) {
-			return this.uc.get(index);
-		} else {
-			return null;
+		for (User u : this.uc) {
+			if (u.username.equals(user.username) && u.pw.equals(user.pw))
+				return u;
 		}
+		return null;
+	}
+	
+	/**
+	 * Checks if an equal user object exists in the database and returns it.
+	 * 
+	 * @param username
+	 *            user to be searched
+	 * @return found user
+	 */
+	public User find(String username) {
+		for (User u : this.uc) {
+			if (u.username.equals(username))
+				return u;
+		}
+		return null;
 	}
 
 	/**
@@ -79,7 +93,7 @@ public class UserCatalog {
 	 */
 	public boolean exists(String user) {
 		for (User u : this.uc) {
-			if (u.username == user)
+			if (u.username.equals(user))
 				return true;
 		}
 		return false;
@@ -102,7 +116,7 @@ public class UserCatalog {
 			return new Pair<Boolean, String>(true, "User doesn't exist.\nCreated a new one");
 		} else {
 			// Either password is wrong or right from this point
-			if (find(client) != null) {
+			if (find(client) == null) {
 				return new Pair<Boolean, String>(false, "Wrong password.");
 			} else {
 				return new Pair<Boolean, String>(true, "Logged in, welcome " + client.username + ".");
@@ -121,6 +135,7 @@ public class UserCatalog {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
 			bw.write(client.username.concat(":").concat(client.pw));
+			bw.newLine();
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -128,18 +143,16 @@ public class UserCatalog {
 	}
 
 	public Pair<Boolean, String> checkFollower(User user, String userCheck) {
-		User local = this.find(user);
-		if (local != null) {
-			// Populate for our user it's followers with the latest ones
-			local.updateFollowers();
+		User check = this.find(userCheck);
+		if (check != null) {
 			// Now check if it contains our user check
-			if (local.followers.contains(userCheck)) {
+			if (check.followers.contains(user.username)) {
 				return new Pair<Boolean, String>(true, userCheck + " follows " + user.username);
 			} else {
 				return new Pair<Boolean, String>(false, userCheck + " doesn't follow " + user.username);
 			}
 		} else {
-			return new Pair<Boolean, String>(false, "Local user not found");
+			return new Pair<Boolean, String>(false, "User not found");
 		}
 
 	}
@@ -156,9 +169,8 @@ public class UserCatalog {
 	public Pair<Boolean, String> addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		// Find our user in the array
 		User test = this.get(user.username);
-		
-		if( test != null )
-		{
+
+		if (test != null) {
 			return test.addPhoto(clientIn, clientOut);
 		}
 		return new Pair<Boolean, String>(false, "Erro a adicionar foto");

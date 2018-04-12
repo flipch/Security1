@@ -24,6 +24,10 @@ import com.sc.utilities.Pair;
 public class PhotoCatalog {
 
 	public ArrayList<Photo> photos;
+	
+	public PhotoCatalog() {
+		
+	}
 
 	public Pair<Boolean, String> addPhoto(String path, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
