@@ -220,10 +220,17 @@ public class Client {
 			// Send our operation parameters
 			out.writeObject(args[1]);
 
-			// Read answer how many times we need for our wanted details.
-			String answer = (String) in.readObject();
-			while( answer.equals("")) {
-				System.out.println("[" + LocalDateTime.now() + "] " + answer);
+			// If we're following the wanted user we can see the details
+			Boolean following = (Boolean) in.readObject();
+			if (following) {
+
+				// Read answer how many times we need for our wanted details.
+				String answer = (String) in.readObject();
+				while (answer.equals("")) {
+					System.out.println("[" + LocalDateTime.now() + "] " + answer);
+				}
+			} else {
+				System.out.println("[" + LocalDateTime.now() + "] " + "You are not following that user");
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
