@@ -101,7 +101,7 @@ public class Client {
 			ObjectOutputStream out) {
 		boolean quit = false;
 		while (!quit) {
-			System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
+			System.out.println("[" + LocalDateTime.now() + "] " + "Choose an operation:");
 			System.out.println(
 					"[" + LocalDateTime.now() + "] " + "[ -a <photo> | -l <userId> | -i <userId> | -g <userId> \n"
 							+ "| -f <followUserIds> | -r <followUserIds> | -quit ]");
@@ -225,9 +225,12 @@ public class Client {
 			if (following) {
 
 				// Read answer how many times we need for our wanted details.
-				String answer = (String) in.readObject();
-				while (answer.equals("")) {
+				
+				boolean done = false;
+				while (!done) {
+					String answer = (String) in.readObject();
 					System.out.println("[" + LocalDateTime.now() + "] " + answer);
+					done = (boolean) in.readObject();
 				}
 			} else {
 				System.out.println("[" + LocalDateTime.now() + "] " + "You are not following that user");

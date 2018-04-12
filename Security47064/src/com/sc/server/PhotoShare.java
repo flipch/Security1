@@ -86,31 +86,40 @@ public class PhotoShare {
 	public void listPhotos(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		try {
 			String userCheck = (String) clientIn.readObject();
-			userCheck = (String) clientIn.readObject();
 			// Prepare response
 			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
-
-			// If localUser follows userCheck
-			if (result.first()) {
-				// Make client get ready for list
-				clientOut.writeObject(result.second());
-				// List photos
-				int count = 1;
-				User target = this.uc.get(userCheck);
-				if (target != null) {
-					for (Photo p : this.uc.get(userCheck).getPhotos()) {
-						clientOut.writeObject(
-								"Photo [" + count++ + "]:\nName " + p.photo + "\nDate created " + p.dateCreated);
+			if (!result.second().contains("not found")) { // If localUser follows userCheck
+				if (result.first() || localUser.username.equals(userCheck)) {
+					// Make client get ready for list
+					clientOut.writeObject(true);
+					// List photos
+					int count = 1;
+					User target = this.uc.get(userCheck);
+					if (target != null) {
+						if (target.getPhotos().size() > 0) {
+							for (Photo p : target.getPhotos()) {
+								clientOut.writeObject(
+										"Photo [" + count + "]: Name " + p.photo + ", Date created " + p.dateCreated);
+								count++;
+								if (target.getPhotos().size() >= count)
+									clientOut.writeObject(false);
+								else
+									clientOut.writeObject(true);
+							}
+							clientOut.writeObject(true);
+						} else {
+							clientOut.writeObject("User has no pictures");
+							clientOut.writeObject(true);
+						}
 					}
-					clientOut.writeObject("");
-				}else {
-					clientOut.writeObject("User not found");
-					clientOut.writeObject("");
+				} else {
+					// Doesnt follow
+					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+					clientOut.writeObject(result.second());
 				}
 			} else {
-				// Doesnt follow
-				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-				clientOut.writeObject(result.second());
+				clientOut.writeObject("User not found");
+				clientOut.writeObject(true);
 			}
 
 		} catch (ClassNotFoundException | IOException e) {
