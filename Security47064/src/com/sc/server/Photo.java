@@ -3,6 +3,7 @@
  */
 package com.sc.server;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -14,9 +15,9 @@ public class Photo {
 	public String photo;
 	public LocalDateTime dateCreated;
 
-	public Photo(String photo, LocalDateTime dt) {
+	public Photo(String photo, String dateTime) {
 		this.photo = photo;
-		this.dateCreated = dt;
+		this.dateCreated = LocalDateTime.parse(dateTime);
 	}
 
 }

@@ -4,9 +4,11 @@
 package com.sc.server;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -24,33 +26,60 @@ import com.sc.utilities.Pair;
 public class PhotoCatalog {
 
 	public ArrayList<Photo> photos;
-	
-	public PhotoCatalog() {
-		
+	private File photosDir, photoLog;
+
+	public PhotoCatalog(String userDir) {
+		this.photosDir = new File(userDir.concat("/Photos"));
+		this.photos = new ArrayList<Photo>();
+		this.photoLog = new File(this.photosDir.toString().concat("/listaFotos.txt"));
+		if (!this.photoLog.exists())
+			try {
+				this.photoLog.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		if (!this.photosDir.exists()) {
+			this.photosDir.mkdir();
+		}
+		updatePhotos();
 	}
 
-	public Pair<Boolean, String> addPhoto(String path, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+	private void updatePhotos() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(photoLog));
+			reader.lines().forEach(line -> {
+				String[] args = line.split(":", 2);
+				this.photos.add(new Photo(args[0], args[1]));
+			});
+
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+
+		}
+
+	}
+
+	public Pair<Boolean, String> addPhoto(ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
 
-		String userDir = path;
-
-		File dir = new File(userDir);
-		if (!dir.exists())
-			dir.mkdir();
-
 		// Get photo name.
-		String photo;
-		photo = (String) clientIn.readObject();
+		String photoName;
+		photoName = (String) clientIn.readObject();
 
-		// Prepare dir where photo and info related to it going to be stored.
-		String temp = userDir.concat("/".concat(photo));
-		File picFile = new File(temp);
+		// Prepare dir where photo is going to be stored.
+		File photoDir = new File(this.photosDir + "/" + photoName.substring(0, photoName.indexOf(".")));
 
+		if (!photoDir.exists())
+			photoDir.mkdir();
+
+		File picFile = new File(photoDir + "/" + photoName);
 		// If doesn't exist accept the one client is sending us
 		if (!picFile.exists()) {
-			clientOut.writeObject("[" + LocalDateTime.now() + "] " + "Receiving Image.");
+			clientOut.writeObject(true);
+			System.out.println("[" + LocalDateTime.now() + "] " + "Receiving Image.");
 
-			FileOutputStream photoOutput = new FileOutputStream(temp);
+			FileOutputStream photoOutput = new FileOutputStream(picFile);
 			OutputStream photoStream = new BufferedOutputStream(photoOutput);
 			byte buffer[] = new byte[1024]; // 1024 bytes at a time
 			int count;
@@ -63,20 +92,22 @@ public class PhotoCatalog {
 
 			// Log new photo and it's creation date to server photo list
 
-			BufferedWriter writer = new BufferedWriter(new FileWriter(userDir.concat("listaFotos.txt"), true));
+			BufferedWriter writer = new BufferedWriter(
+					new FileWriter(this.photosDir.toString().concat("/listaFotos.txt"), true));
 			LocalDateTime dt = LocalDateTime.now();
-			writer.write(photo + ":" + dt);
+			writer.write(photoName + ":" + dt);
 			writer.newLine();
-			System.out.println("[" + LocalDateTime.now() + "] " + "Logged new photo {" + photo + "}");
+			System.out.println("[" + LocalDateTime.now() + "] " + "Logged new photo {" + photoName + "}");
 			// Sync photo catalog
 
-			this.photos.add(new Photo(photo, dt));
+			this.photos.add(new Photo(photoName, dt.toString()));
 
 			writer.close();
 			photoStream.close();
 			return new Pair<Boolean, String>(true, "Success, received image.");
 		} else {
 			System.out.println("[" + LocalDateTime.now() + "] " + "Picture already exists");
+			clientOut.writeObject(false);
 			return new Pair<Boolean, String>(false, "Picture already exists");
 		}
 	}

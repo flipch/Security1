@@ -37,8 +37,10 @@ public class User {
 		this.pw = inPasswd;
 		this.userDir = new File("Server/".concat(this.username));
 		this.userDir.mkdir(); // Even if it exists it's ok.
+		this.pc = new PhotoCatalog(this.userDir.toString());
 		this.followers = new ArrayList<String>();
 		this.followersFile = new File(userDir.toPath().toString().concat("/followers.txt"));
+
 		if (!this.followersFile.exists()) {
 			try {
 				this.followersFile.createNewFile();
@@ -97,7 +99,7 @@ public class User {
 
 	public Pair<Boolean, String> addPhoto(ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		try {
-			return this.pc.addPhoto(this.followersFile.toString(), clientIn, clientOut);
+			return this.pc.addPhoto(clientIn, clientOut);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		}
@@ -148,7 +150,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User " + username.substring(0,1).toUpperCase() + username.substring(1);
+		return "User " + username.substring(0, 1).toUpperCase() + username.substring(1);
 	}
 
 }

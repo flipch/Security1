@@ -1,6 +1,7 @@
 package com.sc.client;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -103,14 +104,14 @@ public class Client {
 		while (!quit) {
 			System.out.println("[" + LocalDateTime.now() + "] " + "Escolha uma operacao:");
 			System.out.println(
-					"[" + LocalDateTime.now() + "] " + "[ -a <photos> | -l <userId> | -i <userId> | -g <userId> \n"
+					"[" + LocalDateTime.now() + "] " + "[ -a <photo> | -l <userId> | -i <userId> | -g <userId> \n"
 							+ "| -f <followUserIds> | -r <followUserIds> | -quit ]");
 			String op = input.nextLine();
 			String[] args = op.split(" ");
 
 			switch (args[0]) {
 			case "-a":
-				sendPhoto(args, out, in);
+				sendPhoto(username, pwd, args, out, in);
 				break;
 			case "-l":
 				getList(args, out, in);
@@ -180,13 +181,35 @@ public class Client {
 	}
 
 	private static void getPhotos(String[] args, ObjectInputStream in, ObjectOutputStream out) {
-		// TODO Auto-generated method stub
+		try {
+			// Send our operation.
+			out.writeObject(args[0]);
+			// Send our operation parameters
+			out.writeObject(args[1]);
 
+			// Read answer
+			String answer = (String) in.readObject();
+			System.out.println("[" + LocalDateTime.now() + "] " + answer);
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void isFollower(String[] args, ObjectOutputStream out, ObjectInputStream in) {
-		// TODO Auto-generated method stub
+		try {
+			// Send our operation.
+			out.writeObject(args[0]);
+			// Send our operation parameters
+			out.writeObject(args[1]);
 
+			// Read answer
+			String answer = (String) in.readObject();
+			System.out.println("[" + LocalDateTime.now() + "] " + answer);
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void getList(String[] args, ObjectOutputStream out, ObjectInputStream in) {
@@ -194,9 +217,53 @@ public class Client {
 
 	}
 
-	private static void sendPhoto(String[] args, ObjectOutputStream out, ObjectInputStream in) {
-		// TODO Auto-generated method stub
+	private static void sendPhoto(String localUser, String localPw, String[] args, ObjectOutputStream out,
+			ObjectInputStream in) {
+		try {
+			// Get our photo which needs to be on our client user folder.
+			File photo = new File("Client/" + localUser + "/" + args[1]);
+			long bytesToSend = photo.length();
 
+			if (photo.exists()) {
+				// Send our operation
+				out.writeObject(args[0]);
+
+				// Send our picture name to check if its already there or not.
+				out.writeObject(args[1]);
+				Boolean allowed = (Boolean) in.readObject();
+
+				if (allowed) {
+					// Means we can send the picture because it's non existent server side
+					FileInputStream photoStream = new FileInputStream(photo);
+
+					// Send 1Mb at a time
+					byte[] buffer = new byte[1024];
+					int bytesRead = 1024;
+
+					// Send how many bytes server should expect from us
+					out.writeObject(photo.length());
+					while ((bytesRead = photoStream.read(buffer, 0,
+							(int) (bytesToSend < 1024 ? bytesToSend : 1024))) > 0) {
+						out.write(buffer, 0, bytesRead);
+						// Update how manye bytes left to be sent.
+						bytesToSend -= bytesRead;
+						out.flush();
+					}
+					String res = (String) in.readObject();
+					System.out.println("[" + LocalDateTime.now() + "] " + res);
+					photoStream.close();
+
+				} else {
+					String res = (String) in.readObject();
+					System.out.println("[" + LocalDateTime.now() + "] " + res);
+				}
+
+			} else {
+				System.out.println("[" + LocalDateTime.now() + "] Given photo not found.");
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

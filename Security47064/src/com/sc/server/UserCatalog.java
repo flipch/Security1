@@ -68,7 +68,7 @@ public class UserCatalog {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Checks if an equal user object exists in the database and returns it.
 	 * 
@@ -147,9 +147,9 @@ public class UserCatalog {
 		if (check != null) {
 			// Now check if it contains our user check
 			if (check.followers.contains(user.username)) {
-				return new Pair<Boolean, String>(true, userCheck + " follows " + user.username);
+				return new Pair<Boolean, String>(true, user.username + " follows " + userCheck);
 			} else {
-				return new Pair<Boolean, String>(false, userCheck + " doesn't follow " + user.username);
+				return new Pair<Boolean, String>(false, user.username + " doesn't follow " + userCheck);
 			}
 		} else {
 			return new Pair<Boolean, String>(false, "User not found");

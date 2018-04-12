@@ -64,40 +64,51 @@ public class PhotoShare {
 		return uc.authUser(inUser, inPasswd);
 	}
 
-	public void addPhoto(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+	public void addPhoto(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
-		clientOut.writeObject(this.uc.addPhoto(user, clientIn, clientOut).second());
+		clientOut.writeObject(this.uc.addPhoto(localUser, clientIn, clientOut).second());
 	}
 
-	public void checkFollower(User user, ObjectInputStream clientIn, ObjectOutputStream clientOut)
+	public void checkFollower(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut)
 			throws ClassNotFoundException, IOException {
 		String userCheck = (String) clientIn.readObject();
-		Pair<Boolean, String> result = uc.checkFollower(user, userCheck);
-		System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-		clientOut.writeObject(result.second());
+
+		if (userCheck.equals(localUser.username)) {
+			System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
+			clientOut.writeObject("You can't follow yourself ");
+		} else {
+			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
+			System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+			clientOut.writeObject(result.second());
+		}
 	}
 
 	public void listPhotos(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
-		String userCheck;
 		try {
-			userCheck = (String) clientIn.readObject();
-			// Prepare response
-			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
+			String userCheck = (String) clientIn.readObject();
 
-			// If localUser follows userCheck
-			if (result.first()) {
-				// List photos
-				int count = 1;
-				for (Photo p : this.uc.get(userCheck).getPhotos()) {
-					clientOut.writeObject(
-							"Photo [" + count++ + "]:\nName " + p.photo + "\nDate created " + p.dateCreated);
-				}
+			if (userCheck.equals(localUser.username)) {
+				System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
+				clientOut.writeObject("You can't follow yourself ");
 			} else {
-				// Doesnt follow
-				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-				clientOut.writeObject(result.second());
-			}
+				userCheck = (String) clientIn.readObject();
+				// Prepare response
+				Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
 
+				// If localUser follows userCheck
+				if (result.first()) {
+					// List photos
+					int count = 1;
+					for (Photo p : this.uc.get(userCheck).getPhotos()) {
+						clientOut.writeObject(
+								"Photo [" + count++ + "]:\nName " + p.photo + "\nDate created " + p.dateCreated);
+					}
+				} else {
+					// Doesnt follow
+					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+					clientOut.writeObject(result.second());
+				}
+			}
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -106,20 +117,25 @@ public class PhotoShare {
 	}
 
 	public void sendPhotos(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
-		String userCheck;
 		try {
-			userCheck = (String) clientIn.readObject();
-			// Prepare response
-			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
+			String userCheck = (String) clientIn.readObject();
 
-			// If localUser follows userCheck
-			if (result.first()) {
-				User user = this.uc.get(userCheck);
-				user.sendPhotos(clientOut);
+			if (userCheck.equals(localUser.username)) {
+				System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
+				clientOut.writeObject("You can't follow yourself ");
 			} else {
-				// Doesnt follow
-				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-				clientOut.writeObject(result.second());
+				// Prepare response
+				Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
+
+				// If localUser follows userCheck
+				if (result.first()) {
+					User user = this.uc.get(userCheck);
+					user.sendPhotos(clientOut);
+				} else {
+					// Doesnt follow
+					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+					clientOut.writeObject(result.second());
+				}
 			}
 		} catch (IOException |
 
