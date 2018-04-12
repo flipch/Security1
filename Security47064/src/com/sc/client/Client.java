@@ -1,10 +1,13 @@
 package com.sc.client;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.time.LocalDateTime;
@@ -79,7 +82,8 @@ public class Client {
 
 			Pair<Boolean, String> res = new Pair<Boolean, String>(first, second);
 			if (res.first()) {
-				System.out.println("[" + LocalDateTime.now() + "] " + "Welcome " + username);
+				System.out.println("[" + LocalDateTime.now() + "] " + "Welcome to PhotoShare "
+						+ username.substring(0, 1).toUpperCase() + username.substring(1));
 				String userDir = "Client/" + username;
 				File dir = new File(userDir);
 				if (!dir.exists())
@@ -110,7 +114,7 @@ public class Client {
 
 			switch (args[0]) {
 			case "-a":
-				sendPhoto(username, pwd, args, out, in);
+				sendPhoto(username, args, out, in);
 				break;
 			case "-l":
 				getList(args, out, in);
@@ -119,7 +123,7 @@ public class Client {
 				isFollower(args, out, in);
 				break;
 			case "-g":
-				getPhotos(args, in, out);
+				getPhotos(username, args, in, out);
 				break;
 			case "-f":
 				follow(args, in, out);
@@ -129,10 +133,10 @@ public class Client {
 				break;
 			case "-quit":
 				quit = !quit;
-				System.out.println("[" + LocalDateTime.now() + "] " + "Closing");
+				System.out.println("[" + LocalDateTime.now() + "] " + "Closing.");
 				break;
 			default:
-				System.out.println("[" + LocalDateTime.now() + "] " + "Invalid operation");
+				System.out.println("[" + LocalDateTime.now() + "] " + "Invalid operation.");
 			}
 		}
 
@@ -179,23 +183,6 @@ public class Client {
 		}
 	}
 
-	private static void getPhotos(String[] args, ObjectInputStream in, ObjectOutputStream out) {
-		try {
-			// Send our operation.
-			out.writeObject(args[0]);
-			// Send our operation parameters
-			out.writeObject(args[1]);
-
-			// Read answer
-			// TODO
-			String answer = (String) in.readObject();
-			System.out.println("[" + LocalDateTime.now() + "] " + answer);
-		} catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	private static void isFollower(String[] args, ObjectOutputStream out, ObjectInputStream in) {
 		try {
 			// Send our operation.
@@ -225,7 +212,7 @@ public class Client {
 			if (following) {
 
 				// Read answer how many times we need for our wanted details.
-				
+
 				boolean done = false;
 				while (!done) {
 					String answer = (String) in.readObject();
@@ -233,7 +220,7 @@ public class Client {
 					done = (boolean) in.readObject();
 				}
 			} else {
-				System.out.println("[" + LocalDateTime.now() + "] " + "You are not following that user");
+				System.out.println("[" + LocalDateTime.now() + "] " + "You are not following that user.");
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -242,8 +229,70 @@ public class Client {
 
 	}
 
-	private static void sendPhoto(String localUser, String localPw, String[] args, ObjectOutputStream out,
-			ObjectInputStream in) {
+	private static void getPhotos(String localUser, String[] args, ObjectInputStream in, ObjectOutputStream out) {
+		try {
+			// Send our operation.
+			out.writeObject(args[0]);
+			// Send our operation parameters ( username to get photos )
+			out.writeObject(args[1]);
+
+			// Sent our parameters now server sends a boolean if we can access those photos
+			boolean allowed = (boolean) in.readObject();
+
+			if (allowed) {
+
+				// Get how many photos we're gonna expect
+				int howManyPhotos = (int) in.readObject();
+
+				System.out.println("[" + LocalDateTime.now() + "] " + "Receiving " + howManyPhotos + " photos.");
+				// Prepare our userDir for the photos
+				File userDir = new File("Client/" + localUser); // We know it already exists since we logged in.
+
+				for (int i = 0; i < howManyPhotos; i++) {
+
+					// Get photo name.
+					String photoName = (String) in.readObject();
+
+					// Photo is going to be stored in ..
+					File photo = new File(userDir.getPath().concat("/" + photoName));
+
+					// If file isn't already locally
+					if (!photo.exists()) {
+
+						FileOutputStream photoOutput = new FileOutputStream(photo);
+						OutputStream photoStream = new BufferedOutputStream(photoOutput);
+						byte buffer[] = new byte[1024]; // 1024 bytes at a time
+						int bytesRead;
+						long bytesLeft = (long) in.readObject();
+						while ((bytesRead = in.read(buffer, 0, (int) (bytesLeft < 1024 ? bytesLeft : 1024))) > 0) {
+							photoOutput.write(buffer, 0, bytesRead);
+							bytesLeft -= bytesRead;
+							photoStream.flush();
+						}
+						photoStream.close();
+						System.out.println("[" + LocalDateTime.now() + "] " + "Received " + photoName);
+					} else {
+						// Leave this loop iteration.
+						System.out.println("[" + LocalDateTime.now() + "] " + "Skipped over " + photoName
+								+ ", we got it already.");
+					}
+				}
+
+				// Finished all our photos
+				// Get success message from server.
+				String answer = (String) in.readObject();
+				System.out.println("[" + LocalDateTime.now() + "] " + answer);
+			} else {
+				// And the reason why we can't access it
+				String answer = (String) in.readObject();
+				System.out.println("[" + LocalDateTime.now() + "] " + answer);
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void sendPhoto(String localUser, String[] args, ObjectOutputStream out, ObjectInputStream in) {
 		try {
 			// Get our photo which needs to be on our client user folder.
 			File photo = new File("Client/" + localUser + "/" + args[1]);
