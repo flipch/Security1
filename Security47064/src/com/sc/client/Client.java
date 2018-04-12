@@ -92,7 +92,6 @@ public class Client {
 			}
 
 		} catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -188,6 +187,7 @@ public class Client {
 			out.writeObject(args[1]);
 
 			// Read answer
+			// TODO
 			String answer = (String) in.readObject();
 			System.out.println("[" + LocalDateTime.now() + "] " + answer);
 		} catch (IOException | ClassNotFoundException e) {
@@ -213,7 +213,22 @@ public class Client {
 	}
 
 	private static void getList(String[] args, ObjectOutputStream out, ObjectInputStream in) {
-		// TODO Auto-generated method stub
+		try {
+			// Send our operation.
+			out.writeObject(args[0]);
+
+			// Send our operation parameters
+			out.writeObject(args[1]);
+
+			// Read answer how many times we need for our wanted details.
+			String answer = (String) in.readObject();
+			while( answer.equals("")) {
+				System.out.println("[" + LocalDateTime.now() + "] " + answer);
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
