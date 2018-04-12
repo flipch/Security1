@@ -86,29 +86,33 @@ public class PhotoShare {
 	public void listPhotos(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		try {
 			String userCheck = (String) clientIn.readObject();
+			userCheck = (String) clientIn.readObject();
+			// Prepare response
+			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
 
-			if (userCheck.equals(localUser.username)) {
-				System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
-				clientOut.writeObject("You can't follow yourself ");
-			} else {
-				userCheck = (String) clientIn.readObject();
-				// Prepare response
-				Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
-
-				// If localUser follows userCheck
-				if (result.first()) {
-					// List photos
-					int count = 1;
+			// If localUser follows userCheck
+			if (result.first()) {
+				// Make client get ready for list
+				clientOut.writeObject(result.second());
+				// List photos
+				int count = 1;
+				User target = this.uc.get(userCheck);
+				if (target != null) {
 					for (Photo p : this.uc.get(userCheck).getPhotos()) {
 						clientOut.writeObject(
 								"Photo [" + count++ + "]:\nName " + p.photo + "\nDate created " + p.dateCreated);
 					}
-				} else {
-					// Doesnt follow
-					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-					clientOut.writeObject(result.second());
+					clientOut.writeObject("");
+				}else {
+					clientOut.writeObject("User not found");
+					clientOut.writeObject("");
 				}
+			} else {
+				// Doesnt follow
+				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+				clientOut.writeObject(result.second());
 			}
+
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

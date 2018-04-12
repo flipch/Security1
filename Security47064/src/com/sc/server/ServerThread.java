@@ -63,7 +63,6 @@ public class ServerThread extends Thread {
 						case "-g":
 							// Send all photos from given user name to client if
 							// localUser.follows(givenUser).
-
 							this.server.sendPhotos(localUser, inStream, outStream);
 							break;
 						case "-f":
