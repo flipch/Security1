@@ -132,24 +132,24 @@ public class PhotoShare {
 	public void sendPhotos(User localUser, ObjectInputStream clientIn, ObjectOutputStream clientOut) {
 		try {
 			String userCheck = (String) clientIn.readObject();
+			// See if userCheck is followed by localUser
+			Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
 
-			if (userCheck.equals(localUser.username)) {
-				System.out.println("[" + LocalDateTime.now() + "] You can't follow yourself");
-				clientOut.writeObject("You can't follow yourself ");
+			// If localUser follows userCheck or localUser wants his photos
+			if (result.first() || userCheck.equals(localUser.username)) {
+				// Send to client he's authorized to get photos
+				clientOut.writeObject(true);
+				
+				// Delegate to sendPhotos on our user class.
+				User user = this.uc.get(userCheck);
+				user.sendPhotos(clientOut, clientIn);
 			} else {
-				// Prepare response
-				Pair<Boolean, String> result = this.uc.checkFollower(localUser, userCheck);
-
-				// If localUser follows userCheck
-				if (result.first()) {
-					User user = this.uc.get(userCheck);
-					user.sendPhotos(clientOut);
-				} else {
-					// Doesnt follow
-					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
-					clientOut.writeObject(result.second());
-				}
+				// Doesnt follow.
+				clientOut.writeObject(false);
+				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+				clientOut.writeObject(result.second());
 			}
+
 		} catch (IOException |
 
 				ClassNotFoundException e) {

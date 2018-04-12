@@ -110,25 +110,36 @@ public class User {
 		return this.pc.photos;
 	}
 
-	public void sendPhotos(ObjectOutputStream clientOut) {
+	public void sendPhotos(ObjectOutputStream clientOut, ObjectInputStream clientIn) {
 		try {
+			clientOut.writeObject(this.pc.size());
 			for (Photo p : this.pc.photos) {
-				clientOut.writeObject(p);
-				File file = new File("Server/" + this.username + "/" + p.photo);
+				// Send photo name.
+				clientOut.writeObject(p.photo);
+				File file = new File("Server/" + this.username + "/Photos/" + p.photo.substring(0,p.photo.indexOf(".")) + "/" + p.photo);
+				// Send photo size in bytes.
 				long size = file.length();
-				FileInputStream photoStream = new FileInputStream(file);
-				byte buffer[] = new byte[1024];
-				int count = 1024;
-				clientOut.writeObject(file.length());
-				while ((count = photoStream.read(buffer, 0, (int) (size < 1024 ? size : 1024))) > 0) {
-					clientOut.write(buffer, 0, count);
-					size -= count;
-					clientOut.flush();
+
+				// Client will now tell us if we're supposed to send this photo
+				boolean supposedToSend = (boolean) clientIn.readObject();
+				if (supposedToSend) {
+					// Start sending.
+					FileInputStream photoStream = new FileInputStream(file);
+					byte buffer[] = new byte[1024];
+					int count = 1024;
+					clientOut.writeObject(file.length());
+					while ((count = photoStream.read(buffer, 0, (int) (size < 1024 ? size : 1024))) > 0) {
+						clientOut.write(buffer, 0, count);
+						size -= count;
+						clientOut.flush();
+					}
+					System.out.println("[" + LocalDateTime.now() + "] " + "Sent " + p.photo);
+					photoStream.close();
 				}
-				System.out.println("[" + LocalDateTime.now() + "] " + "Sent " + p.photo);
-				photoStream.close();
+				// Else do nothing with this photo.
+
 			}
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 

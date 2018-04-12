@@ -112,4 +112,8 @@ public class PhotoCatalog {
 		}
 	}
 
+	public int size() {
+		return this.photos.size();
+	}
+
 }

@@ -258,7 +258,9 @@ public class Client {
 
 					// If file isn't already locally
 					if (!photo.exists()) {
-
+						// Ask for the file.
+						out.writeObject(true);
+						
 						FileOutputStream photoOutput = new FileOutputStream(photo);
 						OutputStream photoStream = new BufferedOutputStream(photoOutput);
 						byte buffer[] = new byte[1024]; // 1024 bytes at a time
@@ -272,6 +274,8 @@ public class Client {
 						photoStream.close();
 						System.out.println("[" + LocalDateTime.now() + "] " + "Received " + photoName);
 					} else {
+						// Skip the file.
+						out.writeObject(false);
 						// Leave this loop iteration.
 						System.out.println("[" + LocalDateTime.now() + "] " + "Skipped over " + photoName
 								+ ", we got it already.");
@@ -279,9 +283,7 @@ public class Client {
 				}
 
 				// Finished all our photos
-				// Get success message from server.
-				String answer = (String) in.readObject();
-				System.out.println("[" + LocalDateTime.now() + "] " + answer);
+				System.out.println("[" + LocalDateTime.now() + "] " + "Transfer complete");
 			} else {
 				// And the reason why we can't access it
 				String answer = (String) in.readObject();
