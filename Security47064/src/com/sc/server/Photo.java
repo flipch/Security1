@@ -3,7 +3,6 @@
  */
 package com.sc.server;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**

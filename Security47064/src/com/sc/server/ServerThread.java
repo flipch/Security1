@@ -1,5 +1,6 @@
 package com.sc.server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -45,37 +46,43 @@ public class ServerThread extends Thread {
 				//
 				if (auth(username, pwd, outStream)) {
 					User localUser = new User(username, pwd);
-					while (!this.socket.isClosed()) {
-						String operacao = (String) inStream.readObject();
-						switch (operacao) {
-						case "-a":
-							// Add photo from client to server.
-							this.server.addPhoto(localUser, inStream, outStream);
-							break;
-						case "-i":
-							// Only checks if given username is a follower
-							this.server.checkFollower(localUser, inStream, outStream);
-							break;
-						case "-l":
-							// If localUser follows given user list all photos from given user.
-							this.server.listPhotos(localUser, inStream, outStream);
-							break;
-						case "-g":
-							// Send all photos from given user name to client if
-							// localUser.follows(givenUser).
-							this.server.sendPhotos(localUser, inStream, outStream);
-							break;
-						case "-f":
-							// Adds localUser to given user followers
-							this.server.follow(localUser, inStream, outStream);
-							break;
-						case "-r":
-							// Removes localUser from given user followers
-							this.server.unfollow(localUser, inStream, outStream);
-							break;
-						default:
-							outStream.writeChars("Operacao invalida");
-							break;
+					boolean dead = false;
+					while (!dead) {
+						try {
+							String operacao = (String) inStream.readObject();
+							switch (operacao) {
+							case "-a":
+								// Add photo from client to server.
+								this.server.addPhoto(localUser, inStream, outStream);
+								break;
+							case "-i":
+								// Only checks if given username is a follower
+								this.server.checkFollower(localUser, inStream, outStream);
+								break;
+							case "-l":
+								// If localUser follows given user list all photos from given user.
+								this.server.listPhotos(localUser, inStream, outStream);
+								break;
+							case "-g":
+								// Send all photos from given user name to client if
+								// localUser.follows(givenUser).
+								this.server.sendPhotos(localUser, inStream, outStream);
+								break;
+							case "-f":
+								// Adds localUser to given user followers
+								this.server.follow(localUser, inStream, outStream);
+								break;
+							case "-r":
+								// Removes localUser from given user followers
+								this.server.unfollow(localUser, inStream, outStream);
+								break;
+							default:
+								outStream.writeChars("Operacao invalida");
+								break;
+							}
+						} catch (EOFException e) {
+							dead = true;
+							System.out.println("[" + LocalDateTime.now() + "] User logged out.");
 						}
 					}
 				}

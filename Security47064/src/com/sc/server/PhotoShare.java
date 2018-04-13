@@ -41,18 +41,20 @@ public class PhotoShare {
 	 * @throws IOException
 	 */
 	public void startListening() throws IOException {
-		if (this.socket.getLocalPort() != -1) {
-			try {
-				Socket client = this.socket.accept();
-				ServerThread serverThread = new ServerThread(client, this);
-				serverThread.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-				this.socket.close();
-			}
+		while (true) {
+			if (this.socket.getLocalPort() != -1) {
+				try {
+					Socket client = this.socket.accept();
+					ServerThread serverThread = new ServerThread(client, this);
+					serverThread.start();
+				} catch (Exception e) {
+					e.printStackTrace();
+					this.socket.close();
+				}
 
-		} else {
-			System.err.println("[" + LocalDateTime.now() + "] " + "Port is still closed!Exiting..");
+			} else {
+				System.err.println("[" + LocalDateTime.now() + "] " + "Port is still closed!Exiting..");
+			}
 		}
 	}
 
