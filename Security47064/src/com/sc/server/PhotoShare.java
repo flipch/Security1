@@ -92,34 +92,34 @@ public class PhotoShare {
 				if (result.first() || localUser.username.equals(userCheck)) {
 					// Make client get ready for list
 					clientOut.writeObject(true);
-					// List photos
-					int count = 1;
+					// Get our targets object
 					User target = this.uc.get(userCheck);
-					if (target != null) {
-						if (target.getPhotos().size() > 0) {
-							for (Photo p : target.getPhotos()) {
-								clientOut.writeObject(
-										"Photo [" + count + "]: Name " + p.photo + ", Date created " + p.dateCreated);
-								count++;
-								if (target.getPhotos().size() >= count)
-									clientOut.writeObject(false);
-								else
-									clientOut.writeObject(true);
-							}
-							clientOut.writeObject(true);
-						} else {
-							clientOut.writeObject("User has no pictures");
-							clientOut.writeObject(true);
+					// For our loop
+					int howManyPhotos = target.getPhotos().size();
+					// Send client how big our list will be
+					clientOut.writeObject(howManyPhotos);
+					int count = 1;
+					if (howManyPhotos > 0) {
+						for (Photo p : target.getPhotos()) {
+							clientOut.writeObject(
+									"Photo [" + count + "]: Name " + p.photo + ", Date created " + p.dateCreated);
+							count++;
 						}
+					} else {
+						clientOut.writeObject("User has no pictures");
 					}
+
 				} else {
 					// Doesnt follow
+					// Say client isn't authorized.
+					clientOut.writeObject(false);
 					System.err.println("[" + LocalDateTime.now() + "] " + result.second());
 					clientOut.writeObject(result.first());
 				}
 			} else {
-				clientOut.writeObject("User not found");
-				clientOut.writeObject(true);
+				clientOut.writeObject(result.first());
+				System.err.println("[" + LocalDateTime.now() + "] " + result.second());
+				clientOut.writeObject(result.second());
 			}
 
 		} catch (ClassNotFoundException | IOException e) {
@@ -139,7 +139,7 @@ public class PhotoShare {
 			if (result.first() || userCheck.equals(localUser.username)) {
 				// Send to client he's authorized to get photos
 				clientOut.writeObject(true);
-				
+
 				// Delegate to sendPhotos on our user class.
 				User user = this.uc.get(userCheck);
 				user.sendPhotos(clientOut, clientIn);

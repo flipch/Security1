@@ -211,16 +211,21 @@ public class Client {
 			Boolean following = (Boolean) in.readObject();
 			if (following) {
 
-				// Read answer how many times we need for our wanted details.
-
-				boolean done = false;
-				while (!done) {
+				// Read answer how many times we need to loop our wanted details.
+				int howManyPhotos = (int) in.readObject();
+				if (howManyPhotos > 0)
+					for (int i = 0; i < howManyPhotos; i++) {
+						String photoDetails = (String) in.readObject();
+						System.out.println("[" + LocalDateTime.now() + "] " + photoDetails);
+					}
+				else {
+					// No photos to be received, we're gonna get a String with the reason why.
 					String answer = (String) in.readObject();
 					System.out.println("[" + LocalDateTime.now() + "] " + answer);
-					done = (boolean) in.readObject();
 				}
 			} else {
-				System.out.println("[" + LocalDateTime.now() + "] " + "You are not following that user.");
+				String answer = (String) in.readObject();
+				System.out.println("[" + LocalDateTime.now() + "] " + answer);
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -260,7 +265,7 @@ public class Client {
 					if (!photo.exists()) {
 						// Ask for the file.
 						out.writeObject(true);
-						
+
 						FileOutputStream photoOutput = new FileOutputStream(photo);
 						OutputStream photoStream = new BufferedOutputStream(photoOutput);
 						byte buffer[] = new byte[1024]; // 1024 bytes at a time
